@@ -1,137 +1,144 @@
-# PredictiX - Multi-Disease Prediction System
+👋 Hey! Welcome to MediMind 🧠
 
-PredictiX is a comprehensive multi-disease prediction platform designed to predict heart disease, diabetes, breast cancer, and lung cancer. Built using the MERN stack and integrated with machine learning models, PredictiX offers an intuitive interface for users to input data and receive accurate health predictions, enhancing the diagnostic experience.
+This is my university project, MediMind! It's an AI-powered website I built to show how we can use machine learning to help predict serious health conditions.
 
-## Table of Contents
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Machine Learning Models](#machine-learning-models)
-- [Usage](#usage)
-- [Frontend Design](#frontend-design)
-- [File Structure](#file-structure)
-- [Screenshots](#screenshots)
-- [Future Enhancements](#future-enhancements)
-- [License](#license)
+It's a complete full-stack application, which means it has a pretty frontend (what you see) and a really complex backend (what does all the work). The backend is a cool mix of Node.js for the website stuff and Python for all the heavy-duty AI "thinking."
 
-## Features
+✨ What Can It Do?
 
-- **User Authentication:** Secure sign-up and login functionality with protected routes using Context API.
-- **Predictive Models:**
-  - Heart disease prediction using Logistic Regression.
-  - Diabetes prediction using Support Vector Machine (SVM).
-  - Breast cancer prediction using Convolutional Neural Network (CNN).
-  - Lung cancer prediction using the InceptionResNet model.
-- **Image Upload for Cancer Predictions:** Users can upload medical images for breast and lung cancer detection.
-- **Prescription Upload:** Automatic form filling for heart disease and diabetes predictors using regex to scan user-uploaded prescriptions.
-- **Custom PDF Reports:** Generate a downloadable PDF report of prediction results.
-- **Real-time Notifications:** Integrated React Toasts for user-friendly notifications.
-- **Single Server Deployment:** Node.js Child Process is used to run all models, eliminating the need for a separate Flask server.
+I'm glad you asked! The app is built around four main predictors:
 
-## Tech Stack
+Heart Disease: You can input a patient's data (like cholesterol, age, etc.), and it'll predict the likelihood of heart disease.
 
-- **Frontend:** React JS (with Vite), Context API, React Toasts, Figma for design.
-- **Backend:** Node.js, Express.js, Node.js Child Process for running machine learning models.
-- **Database:** MongoDB (for user data and predictions).
-- **Machine Learning Models:** Logistic Regression, SVM, CNN, InceptionResNet.
-- **Other Libraries:** 
-  - `pdf-lib` for generating custom PDF reports.
-  - `multer` for file uploads (images and prescriptions).
-  - `concurrently` for running client and server simultaneously.
+Diabetes: This one uses a Naive Bayes model (a classic AI algorithm) to predict diabetes from patient info.
 
-## Machine Learning Models
+Lung Cancer: This is one of the deep learning models. You can upload a CT scan image, and the AI (a TensorFlow/Keras model) will analyze it to detect signs of lung cancer.
 
-- **Heart Disease Prediction:**
-  - Algorithm: Logistic Regression.
-  - Input Features:
-    - Age, Sex, Chest Pain Type, Resting Blood Pressure, Serum Cholesterol, Fasting Blood Sugar, ECG Results, Max Heart Rate, Exercise Induced Angina, ST Depression, Peak ST Slope, Number of Vessels, Thalassemia.
+Breast Cancer: Similar to the lung model, this one uses a deep learning model to analyze histological images (microscope slides) for breast cancer.
 
-- **Diabetes Prediction:**
-  - Algorithm: Support Vector Machine (SVM).
-  - Input Features:
-    - Pregnancies, Glucose, Blood Pressure, Skin Thickness, Insulin, BMI, Diabetes Pedigree Function, Age.
+On top of that, I've also built in:
 
-- **Breast Cancer Prediction:**
-  - Algorithm: Convolutional Neural Network (CNN).
-  - Input: Breast tissue image.
+Full User Accounts: You can sign up and log in securely.
 
-- **Lung Cancer Prediction:**
-  - Algorithm: InceptionResNet.
-  - Input: Lung X-ray or CT scan image.
+Your Own PDF Reports: After you get a prediction, you can download a personalized PDF report. I even made it add our "MediMind" logo and the current date to the report!
 
-## Usage
+Custom Branding: I fully rebranded the original project with our new "MediMind" logo, colors, and our team page.
 
-1. **Sign up** or **Log in** to access the predictors.
-2. Navigate to the respective disease predictor (Heart, Diabetes, Breast, Lung).
-3. **For heart disease and diabetes:** Fill in the form manually or upload a prescription, and the system will auto-populate the fields using regex.
-4. **For breast and lung cancer:** Upload an image (X-ray or CT scan).
-5. Submit the form and view the prediction result.
-6. Download the custom PDF report for future reference.
+Works on Mobile: The whole site is responsive, so it looks good on your phone, too.
 
-## Frontend Design
+🛠️ How It's Built (The Tech Stack)
 
-The frontend design has been created using [Figma](https://www.figma.com/design/psQyNMetXUsjCcvmvvjqIg/PredictiX---Final-Year-Project?node-id=0-1&t=KuA0zys1uwoHgMxW-1). It outlines the structure and user flow of the application, ensuring a seamless user experience.
+This was the tricky part! It's not just one website; it's two separate applications working together.
 
-## File Structure
+The Frontend (What You See)
 
-```bash
-PredictiX/
-├── Backend/                # Backend code
-│   ├── src/                # Source code
-│   │   ├── controllers/    # Controller files
-│   │   ├── DataScrapingScripts/ # Scripts for data scraping
-│   │   ├── db/             # Database configuration
-│   │   ├── middlewares/     # Middleware functions
-│   │   ├── models/         # Database models
-│   │   ├── routes/         # API route definitions
-│   │   ├── utils/          # Utility functions
-│   │   ├── app.js          # Main application file
-│   │   ├── constants.js     # Constant values
-│   │   └── index.js        # Entry point for the application
-│   └── uploads/            # Uploaded files (prescriptions, etc.)
-├── Frontend/               # Frontend code
-│   ├── public/             # Public assets
-│   │   └── PredictiXLogo.png # Logo file
-│   └── src/                # Source code
-│       ├── assets/         # Static assets
-│       ├── components/     # React components
-│       ├── context/        # Context API files
-│       ├── pages/          # Page components
-│       ├── ReportTemplate/  # Template for reports
-│       ├── utils/          # Utility functions
-│       ├── App.css         # Main CSS file
-│       ├── App.jsx         # Main React component
-│       └── main.jsx        # Entry point for the frontend
-├── Medical Reports/        # Generated medical reports
-├── ML/                     # Machine learning models and scripts
-├── Screenshots/            # Application screenshots
-├── LICENSE                 # License file
-└── README.md               # README file
+React.js: This is what makes the website feel fast and modern without reloading all the time.
 
-```
+React Router: Handles switching between pages (like Home, About, Predictors).
 
-## Screenshots
+pdf-lib: A neat little library I used to build the PDF reports right in your browser.
 
-### Homepage
-![Homepage](https://raw.githubusercontent.com/hallowshaw/PredictiX/main/Screenshots/SS1.png)
+CSS: All the custom styling, animations, and branding you see.
 
-### Sign Up Page
-![Sign Up](https://raw.githubusercontent.com/hallowshaw/PredictiX/main/Screenshots/SS2.png)
+The Backend (The "Kitchen")
 
-### Predictors Page
-![Predictors](https://raw.githubusercontent.com/hallowshaw/PredictiX/main/Screenshots/SS3.png)
+Node.js & Express.js: This is the main server. It handles things like user logins, file uploads, and talking to the frontend.
 
-### About Page
-![About](https://raw.githubusercontent.com/hallowshaw/PredictiX/main/Screenshots/SS4.png)
+Python: This is the "brain" where the actual AI lives.
+
+child_process (The "Magic" Part): This is the bridge. When you ask for a prediction, the Node.js server uses this to "call up" a Python script, send it your data, get the AI's answer, and then send that answer back to you.
+
+The "Brain" Itself (The Python ML)
+
+TensorFlow & Keras: For the big, complex deep learning models that look at images (Lung and Breast Cancer).
+
+Scikit-learn: For the more "classic" AI models like Naive Bayes (which we used for Diabetes).
+
+Pandas & NumPy: The workhorses for organizing all the data before feeding it to the models.
+
+Joblib: This is how I saved and loaded the trained models so they're ready to make predictions instantly.
+
+🚀 How to Run This Project Yourself
+
+If you want to run this on your own computer, you have to set up both the backend and frontend. It's like starting a car engine and turning on the radio—they're two separate things.
+
+What You'll Need
+
+Node.js (v18 or later)
+
+Python (v3.11 or later)
+
+Git (for downloading the code)
+
+The Setup Guide
+
+1. Download the Code
+
+git clone [https://github.com/your-username/MediMind.git](https://github.com/your-username/MediMind.git)
+cd MediMind
 
 
-## Future Enhancements
+2. Set Up the Backend (Do this in Terminal 1)
+This is the most important part. Get this working first.
 
-- **OCR Integration:** Plan to replace regex with Optical Character Recognition (OCR) for extracting prescription data more efficiently.
-- **Mobile Application:** Expand PredictiX into a cross-platform mobile app using React Native.
-- **Additional Predictors:** Add more disease predictors to extend the functionality.
-- **Enhanced Image Processing:** Use more advanced techniques for image analysis, improving accuracy for cancer detection.
-- **Integration with Wearables:** Sync health data from wearables for real-time predictions.
+# 1. Go into the backend folder
+cd Backend
 
-## License
+# 2. Install all the Node.js parts
+npm install
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+# 3. Create a fresh Python "toolbox" (a virtual environment)
+python -m venv venv
+
+# 4. Activate that toolbox
+# On Windows:
+.\venv\Scripts\activate
+# On Mac/Linux:
+# source venv/bin/activate
+
+# 5. Install all the Python magic
+# (You must see (venv) in your terminal for this to work!)
+pip install -r requirements.txt
+
+
+3. Set Up the Frontend (Do this in Terminal 2)
+Open a brand new, second terminal for this.
+
+# 1. From the main "MediMind" folder, go to the frontend
+cd Frontend
+
+# 2. Install all the React parts
+npm install
+
+
+🏃‍♂️ Let's Run It!
+
+You need to keep both terminals open at the same time.
+
+Terminal 1 (Your Backend):
+
+Make sure you're in the Backend folder and (venv) is active.
+
+# This starts the "brain"
+npm run dev
+
+
+You'll see a message that it's running on http://localhost:8080.
+
+Terminal 2 (Your Frontend):
+
+Make sure you're in the Frontend folder.
+
+# This starts the website
+npm run dev
+
+
+Your browser will automatically open to http://localhost:5173.
+
+And that's it! You can now use the full website on your local machine.
+
+🧑‍💻 The Team
+
+This project was fixed, rebranded, and put together by:
+
+Sudhanshu Kunwar
