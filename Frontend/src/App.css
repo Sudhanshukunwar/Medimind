@@ -1689,7 +1689,7 @@ a.lung-page-button:visited {
 
 .team__img {
   width: 100%;
-  height: 200px;
+  height: 250px;
   overflow: hidden;
   position: relative;
 }
@@ -1698,6 +1698,7 @@ a.lung-page-button:visited {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
   transition: transform 0.3s ease;
 }
 

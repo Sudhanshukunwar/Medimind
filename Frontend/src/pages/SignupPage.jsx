@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import "../App.css";
 import SignupVector from "../assets/SignupVector.png";
 import { UserContext } from "../context/UserContext";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -13,7 +13,6 @@ function SignupPage() {
   const [password, setPassword] = useState("");
 
   const { setUserInfo } = useContext(UserContext);
-  const navigate = useNavigate();
 
   async function signup(e) {
     e.preventDefault();
@@ -23,14 +22,10 @@ function SignupPage() {
       toast.error("Please fill out all fields");
       return;
     }
-
-    // Fullname validation (example: must be at least 3 characters)
     if (fullname.length < 3) {
       toast.error("Full name must be at least 3 characters long");
       return;
     }
-
-    // Username validation (example: must be alphanumeric and between 3-20 characters)
     const usernameRegex = /^[a-zA-Z0-9]{3,20}$/;
     if (!usernameRegex.test(username)) {
       toast.error(
@@ -38,15 +33,11 @@ function SignupPage() {
       );
       return;
     }
-
-    // Email format validation including the presence of "@"
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address");
       return;
     }
-
-    // Password validation (example: must be at least 6 characters)
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters long");
       return;
@@ -71,10 +62,9 @@ function SignupPage() {
       setUserInfo(userInfo);
       toast.success("Signup successful! Redirecting to homepage...");
 
-      // Delay navigation to show the toast for a few seconds
       setTimeout(() => {
-        navigate("/");
-      }, 3000); // 3 seconds delay
+        window.location.href = "/";
+      }, 3000);
     } catch (error) {
       console.error("Error:", error);
       toast.error("An unexpected error occurred. Please try again.");
@@ -120,6 +110,8 @@ function SignupPage() {
               type="password"
               placeholder="Password"
               value={password}
+              // --- THIS IS THE FIX ---
+              // Corrected e.gittarget.value to e.target.value
               onChange={(e) => setPassword(e.target.value)}
             />
             <button type="submit" className="signup-button">
@@ -141,3 +133,4 @@ function SignupPage() {
 }
 
 export default SignupPage;
+

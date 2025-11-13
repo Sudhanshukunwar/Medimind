@@ -1,23 +1,15 @@
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-
 import { spawn } from "child_process";
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
-
 import path from "path";
 import fs from "fs";
+import multer from "multer";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
 
-// Set up multer for file uploads
-
-// Get the directory path of the current ES module file
+// --- Multer Setup ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-//------------------------------------
-
-import multer from "multer";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -27,273 +19,140 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
+export const upload = multer({ storage: storage });
 
-const upload = multer({ storage: storage });
+// --- Helper for Deleting Files ---
+const deleteFile = (filePath) => {
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error(`Error deleting file: ${filePath}`, err);
+    }
+  });
+};
 
-export { upload };
+// --- Define the absolute path to the Python in your venv ---
+const pythonExecutable = resolve(__dirname, "..", "venv", "Scripts", "python.exe");
 
-// Define the relative path to the heartpredict.py script
-const heartPath = resolve(
-  __dirname,
-  "../ML/Heart Disease Prediction/heartpredict.py"
-);
-
-// Define the relative path to the diabetespredict.py script
-const diabetesPath = resolve(
-  __dirname,
-  "../ML/Diabetes Prediction/diabetespredict.py"
-);
+// --- Prediction Controllers ---
 
 const heartpred = asyncHandler(async (req, res) => {
-  try {
-    const { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13 } = req.body;
+  const { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13 } = req.body;
+  const transformedP2 = isNaN(p2) ? (p2.toLowerCase() === "male" ? 1 : 0) : p2;
+  const transformedP6 = isNaN(p6) ? (p6.toLowerCase() === "yes" ? 1 : 0) : p6;
 
-    // Condition check for p2: If male (assuming 1 for male and 0 for female)
-    const transformedP2 = isNaN(p2)
-      ? p2.toLowerCase() === "male"
-        ? 1
-        : 0
-      : p2;
+  const scriptPath = resolve(__dirname, "../ML/Heart Disease Prediction/heartpredict.py");
+  const inputData = [p1, transformedP2, p3, p4, p5, transformedP6, p7, p8, p9, p10, p11, p12, p13];
 
-    // Condition check for p6: If yes (assuming 1 for yes and 0 for no)
-    const transformedP6 = isNaN(p6) ? (p6.toLowerCase() === "yes" ? 1 : 0) : p6;
+  const pythonProcess = spawn(pythonExecutable, [scriptPath, ...inputData]);
 
-    const python = spawn("python", [
-      heartPath,
-      p1,
-      transformedP2.toString(),
-      p3,
-      p4,
-      p5,
-      transformedP6.toString(),
-      p7,
-      p8,
-      p9,
-      p10,
-      p11,
-      p12,
-      p13,
-    ]);
+  let predictionVal = "";
+  let errorData = "";
 
-    let predictionVal = "";
+  pythonProcess.stdout.on("data", (data) => (predictionVal += data.toString()));
+  pythonProcess.stderr.on("data", (data) => (errorData += data.toString()));
 
-    python.stdout.on("data", (data) => {
-      console.log("python stdout: ", data.toString());
-      predictionVal = data.toString().trim();
-    });
-
-    python.stderr.on("data", (data) => {
-      console.error("python stderr: ", data.toString());
-    });
-
-    python.on("close", (code) => {
-      if (code !== 0) {
-        console.error(`Python script exited with code ${code}`);
-        res.status(500).json({ message: "Python script error" });
-      } else {
-        console.log("predictionVal: ", predictionVal);
-        console.log(typeof predictionVal);
-        if (predictionVal === "1") {
-          res.json({
-            prediction: predictionVal.trim(),
-            result: "The person is suffering from Heart Disease",
-          });
-        } else if (predictionVal === "0") {
-          res.json({
-            prediction: predictionVal.trim(),
-            result: "The person is not suffering from Heart Disease",
-          });
-        }
-      }
-    });
-  } catch (error) {
-    console.error("Error", error);
-    res.status(500).json({ message: "Failed to predict" });
-  }
+  pythonProcess.on("close", (code) => {
+    if (code !== 0) {
+      console.error("Heart prediction stderr:", errorData);
+      return res.status(500).json({ message: "Prediction script failed", details: errorData });
+    }
+    predictionVal = predictionVal.trim();
+    if (predictionVal === "1") {
+      return res.json({ prediction: predictionVal, result: "The person is suffering from Heart Disease" });
+    }
+    return res.json({ prediction: predictionVal, result: "The person is not suffering from Heart Disease" });
+  });
 });
 
 const diabetespred = asyncHandler(async (req, res) => {
-  try {
-    const {
-      pregnancies,
-      glucose,
-      bloodPressure,
-      skinThickness,
-      insulin,
-      bmi,
-      diabetesPedigreeFunction,
-      age,
-    } = req.body;
+  const { pregnancies, glucose, bloodPressure, skinThickness, insulin, bmi, diabetesPedigreeFunction, age } = req.body;
 
-    const inputData = [
-      pregnancies,
-      glucose,
-      bloodPressure,
-      skinThickness,
-      insulin,
-      bmi,
-      diabetesPedigreeFunction,
-      age,
-    ];
+  const scriptPath = resolve(__dirname, "../ML/Diabetes Prediction/diabetespredict.py");
+  const inputData = [pregnancies, glucose, bloodPressure, skinThickness, insulin, bmi, diabetesPedigreeFunction, age];
 
-    if (!inputData.every((value) => typeof value !== "undefined")) {
-      throw new ApiError(400, "All inputData fields must be provided");
-    }
-
-    const pythonProcess = spawn("python", [diabetesPath, ...inputData]);
-
-    let predictionVal = "";
-
-    pythonProcess.stdout.on("data", (data) => {
-      console.log("python stdout: ", data.toString());
-      predictionVal = data.toString().trim();
-    });
-
-    pythonProcess.stderr.on("data", (data) => {
-      console.error(`stderr: ${data.toString()}`);
-    });
-
-    pythonProcess.on("close", (code) => {
-      if (code !== 0) {
-        console.error(`Python script exited with code ${code}`);
-        res.status(500).json({ message: "Python script error" });
-      } else {
-        console.log("predictionVal: ", predictionVal);
-        console.log(typeof predictionVal);
-        if (predictionVal === "1") {
-          res.json({
-            prediction: predictionVal.trim(),
-            result: "The person is suffering from Diabetes",
-          });
-        } else if (predictionVal === "0") {
-          res.json({
-            prediction: predictionVal.trim(),
-            result: "The person is not suffering from Diabetes",
-          });
-        }
-      }
-    });
-  } catch (error) {
-    console.error("Error", error);
-    res.status(500).json({ message: "Failed to predict" });
+  if (!inputData.every((value) => typeof value !== "undefined")) {
+    throw new ApiError(400, "All inputData fields must be provided");
   }
+
+  const pythonProcess = spawn(pythonExecutable, [scriptPath, ...inputData]);
+
+  let predictionVal = "";
+  let errorData = "";
+
+  pythonProcess.stdout.on("data", (data) => (predictionVal += data.toString()));
+  pythonProcess.stderr.on("data", (data) => (errorData += data.toString()));
+
+  pythonProcess.on("close", (code) => {
+    if (code !== 0) {
+      console.error("Diabetes prediction stderr:", errorData);
+      return res.status(500).json({ message: "Prediction script failed", details: errorData });
+    }
+    predictionVal = predictionVal.trim();
+    if (predictionVal === "1") {
+      return res.json({ prediction: predictionVal, result: "The person is suffering from Diabetes" });
+    }
+    return res.json({ prediction: predictionVal, result: "The person is not suffering from Diabetes" });
+  });
 });
 
 const lungpred = asyncHandler(async (req, res) => {
-  try {
-    if (!req.file) {
-      console.error("Multer did not process the file");
-      throw new ApiError(400, "No image file uploaded");
+  if (!req.file) throw new ApiError(400, "No image file uploaded");
+  const filePath = req.file.path;
+  const scriptPath = resolve(__dirname, "../ML/Lung Cancer Prediction/predict.py");
+
+  const pythonProcess = spawn(pythonExecutable, [scriptPath, filePath]);
+
+  let predictionData = "";
+  let errorData = "";
+
+  pythonProcess.stdout.on("data", (data) => (predictionData += data.toString()));
+  pythonProcess.stderr.on("data", (data) => (errorData += data.toString()));
+
+  pythonProcess.on("close", (code) => {
+    deleteFile(filePath); // Always delete the file
+    if (code !== 0) {
+      console.error("Lung prediction stderr:", errorData);
+      return res.status(500).json({ error: "Prediction script failed", details: errorData });
     }
+    predictionData = predictionData.trim();
 
-    const filePath = path.resolve(
-      __dirname,
-      "..",
-      "uploads",
-      req.file.filename
-    );
-    console.log("Resolved file path:", filePath);
+    console.log("Raw output from Python script (Lung):", predictionData);
 
-    if (!fs.existsSync(filePath)) {
-      throw new ApiError(404, "Uploaded file not found");
+    // --- THIS IS THE FIX: Check the *end* of the string, not the whole thing ---
+    if (predictionData.endsWith("cancerous")) {
+      return res.status(200).json({ prediction: "Person is suffering from Lung Cancer" });
+    } else if (predictionData.endsWith("non-cancerous")) {
+      return res.status(200).json({ prediction: "Person is not suffering from Lung Cancer" });
     }
-
-    const pythonProcess = spawn("python", [
-      path.resolve(__dirname, "../ML/Lung Cancer Prediction/predict.py"),
-      filePath,
-    ]);
-
-    let predictionData = "";
-    let errorOccurred = false;
-
-    pythonProcess.stdout.on("data", (data) => {
-      predictionData += data.toString();
-    });
-
-    pythonProcess.stderr.on("data", (data) => {
-      console.error(`Error from Python script: ${data}`);
-      errorOccurred = true;
-      res.status(500).json({ error: "Prediction error" });
-    });
-
-    pythonProcess.on("close", (code) => {
-      if (code === 0 && !errorOccurred) {
-        predictionData = predictionData.trim();
-        if (predictionData === "cancerous") {
-          res
-            .status(200)
-            .json({ prediction: "Person is suffering from Lung Cancer" });
-        } else if (predictionData === "non-cancerous") {
-          res
-            .status(200)
-            .json({ prediction: "Person is not suffering from Lung Cancer" });
-        } else {
-          res.status(500).json({ error: "Unexpected prediction result" });
-        }
-      } else if (!errorOccurred) {
-        res.status(500).json({ error: "Prediction error" });
-      }
-
-      // Always delete the file after the prediction process
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.error("Error deleting file:", err);
-        }
-      });
-    });
-  } catch (error) {
-    console.error("Error in lungpred controller:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+    
+    // This is the fallback if the output is unexpected
+    return res.status(500).json({ error: "Unexpected prediction result", details: predictionData });
+  });
 });
 
 const breastpred = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    console.error("Multer did not process the file");
-    throw new ApiError(400, "No image file uploaded");
-  }
+  if (!req.file) throw new ApiError(400, "No image file uploaded");
+  const filePath = req.file.path;
+  const scriptPath = resolve(__dirname, "../ML/Breast Cancer Prediction/breast_cancer_prediction.py");
 
-  const filePath = path.resolve(__dirname, "..", "uploads", req.file.filename);
-  console.log("Resolved file path:", filePath);
-
-  if (!fs.existsSync(filePath)) {
-    throw new ApiError(404, "Uploaded file not found");
-  }
-
-  const pythonProcess = spawn("python", [
-    path.resolve(
-      __dirname,
-      "../ML/Breast Cancer Prediction/breast_cancer_prediction.py"
-    ),
-    filePath,
-  ]);
+  const pythonProcess = spawn(pythonExecutable, [scriptPath, filePath]);
 
   let predictionData = "";
-  let errorOccurred = false;
+  let errorData = "";
 
-  pythonProcess.stdout.on("data", (data) => {
-    predictionData += data.toString();
-  });
-
-  pythonProcess.stderr.on("data", (data) => {
-    console.error(`Error: ${data}`);
-    errorOccurred = true;
-    res.status(500).json({ error: "Prediction error" });
-  });
+  pythonProcess.stdout.on("data", (data) => (predictionData += data.toString()));
+  pythonProcess.stderr.on("data", (data) => (errorData += data.toString()));
 
   pythonProcess.on("close", (code) => {
-    if (code === 0 && !errorOccurred) {
-      res.status(200).json({ prediction: predictionData.trim() });
-    } else if (!errorOccurred) {
-      res.status(500).json({ error: "Prediction error" });
+    deleteFile(filePath); // Always delete the file
+    if (code !== 0) {
+      console.error("Breast prediction stderr:", errorData);
+      return res.status(500).json({ error: "Prediction script failed", details: errorData });
     }
 
-    // Always delete the file after the prediction process
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error("Error deleting file:", err);
-      }
-    });
+    console.log("Raw output from Python script (Breast):", predictionData.trim());
+
+    return res.status(200).json({ prediction: predictionData.trim() });
   });
 });
 

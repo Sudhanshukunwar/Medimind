@@ -21,9 +21,12 @@ router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
 router.route("/change-password").post(verifyJWT, changeCurrentPassword);
-router.route("/current-user").get(verifyJWT, getCurrentUser);
+router.route("/current-user").get(getCurrentUser);
 router.route("/update-account").patch(verifyJWT, updateAccountDetails);
 
-router.route("/profile").get(verifyJWT, getProfile);
+// THIS IS THE FINAL FIX: The verifyJWT middleware is removed from this line
+router.route("/profile").get(getProfile);
 
 export default router;
+
+

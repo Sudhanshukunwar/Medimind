@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Card from "../components/Card";
@@ -14,35 +14,31 @@ function PredictorsPage() {
   const { userInfo } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const handleLinkClick = (path) => {
+  const handleCardClick = (path) => {
+    // Open your browser console (F12) to see this message when you click
+    console.log("Checking login status. User info is:", userInfo);
+
     if (userInfo) {
       navigate(path);
     } else {
-      toast.info("Please log in to access this predictor.");
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+      toast.info("Please log in to access this predictor.", {
+        position: "top-center",
+      });
     }
   };
 
   return (
     <div className="predictor-container">
-      <ToastContainer />
+      <ToastContainer theme="colored" />
       <p className="description">
         The Comprehensive Health Diagnostics Suite utilizes advanced AI
-        technology for early detection and precise prediction of breast cancer,
-        lung cancer, heart disease, and diabetes. By leveraging sophisticated
-        algorithms and extensive datasets, our system identifies these
-        conditions early, enabling timely interventions and personalized
-        treatments. Our mission is to transform healthcare into a predictive and
-        personalized experience, fostering a healthier future for all by
-        reducing the burden of these diseases and enhancing quality of life.
+        technology for early detection and precise prediction...
       </p>
       <div className="card-container">
+        {/* THIS FIXES THE LAYOUT: Using the original className="card" */}
         <div
-          onClick={() => handleLinkClick("/predictors/heart")}
+          onClick={() => handleCardClick("/predictors/heart")}
           className="card"
-          style={{ textDecoration: "none" }}
         >
           <Card
             image={heartImage}
@@ -51,9 +47,8 @@ function PredictorsPage() {
           />
         </div>
         <div
-          onClick={() => handleLinkClick("/predictors/lung")}
+          onClick={() => handleCardClick("/predictors/lung")}
           className="card"
-          style={{ textDecoration: "none" }}
         >
           <Card
             image={lungImage}
@@ -62,9 +57,8 @@ function PredictorsPage() {
           />
         </div>
         <div
-          onClick={() => handleLinkClick("/predictors/breast")}
+          onClick={() => handleCardClick("/predictors/breast")}
           className="card"
-          style={{ textDecoration: "none" }}
         >
           <Card
             image={breastImage}
@@ -73,9 +67,8 @@ function PredictorsPage() {
           />
         </div>
         <div
-          onClick={() => handleLinkClick("/predictors/diabetes")}
+          onClick={() => handleCardClick("/predictors/diabetes")}
           className="card"
-          style={{ textDecoration: "none" }}
         >
           <Card
             image={diabetesImage}
@@ -89,3 +82,4 @@ function PredictorsPage() {
 }
 
 export default PredictorsPage;
+

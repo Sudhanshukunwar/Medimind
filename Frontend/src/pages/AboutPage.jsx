@@ -3,44 +3,44 @@ import "../App.css";
 import { FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa";
 import Modal from "react-modal";
 
-import team01 from "../assets/AboutImg/team-01.jpg";
-import team02 from "../assets/AboutImg/team-02.jpg";
-import team03 from "../assets/AboutImg/team-03.jpg";
-import team04 from "../assets/AboutImg/team-04.jpg";
+import team01 from "../assets/AboutImg/Gemini_Generated_Image_xhr6okxhr6okxhr6.png";
+import team02 from "../assets/AboutImg/Screenshot 2025-10-15 235901.png";
+import team03 from "../assets/AboutImg/team 03.jpg";
+import team04 from "../assets/AboutImg/team 04.jpg";
 
 // Define team members
 const teamMembers = [
   {
     imgUrl: team01,
-    name: "Arunetri Dhar",
-    position: "Machine Learning Developer",
-    linkedin: "https://www.linkedin.com/in/arunetri-dhar-2a2979232/",
-    github: "https://github.com/Aru-2359",
-    instagram: "https://www.instagram.com/unfaithfully_yours.aruuuuuu/",
+    name: "Sudhanshu kunwar",
+    position: "Full Stack & Machine Learning Developer",
+    linkedin: "https://www.linkedin.com/in/sudhanshu-kunwar-465bbb376/",
+    github: "https://github.com/Sudhanshukunwar",
+    instagram: "https://www.instagram.com/_sudhanshu4_/",
   },
   {
     imgUrl: team02,
-    name: "Soumik Sen",
+    name: "Aryan Kushwaha",
     position: "Full Stack & Machine Learning Developer",
-    linkedin: "https://www.linkedin.com/in/soumik-sen-210473211/",
-    github: "https://github.com/SoumikSen10",
-    instagram: "https://www.instagram.com/soumiksen_10/",
+    linkedin: "https://www.linkedin.com/in/aryan-kushwaha-537819284/",
+    github: "https://github.com/Direct25",
+    instagram: "https://www.instagram.com/itsaryan2.2/",
   },
   {
     imgUrl: team03,
-    name: "Utsha Majumder",
+    name: "Abhishek Kumhar",
     position: "Machine Learning Developer",
     linkedin: "https://www.linkedin.com/in/utsha-majumder18032004/",
-    github: "https://github.com/Utsha-18",
-    instagram: "https://www.instagram.com/_u_t_s_h_a_/",
+    github: "https://github.com/Abhishek8154",
+    instagram: "https://www.instagram.com/abhi__.81z/",
   },
   {
     imgUrl: team04,
-    name: "Rhitam Chaudhury",
+    name: "Ambikesh Mishra",
     position: "Frontend & Machine Learning Developer",
-    linkedin: "https://www.linkedin.com/in/rhitam-chaudhury-66b17b248/",
-    github: "https://github.com/hallowshaw",
-    instagram: "https://www.instagram.com/illusional_destiny/",
+    linkedin: "https://www.linkedin.com/in/ambikesh-mishra-2725202b8/",
+    github: "https://github.com/",
+    instagram: "https://www.instagram.com/ambikesshh/",
   },
 ];
 
@@ -98,7 +98,7 @@ function AboutPage() {
     <section className="our__team">
       <div className="container">
         <div className="team__content">
-          <h6 className="subtitle">Bonjour</h6>
+          <h6 className="subtitle"></h6>
           <h2>
             Meet <span className="highlight">Our Team</span>
           </h2>

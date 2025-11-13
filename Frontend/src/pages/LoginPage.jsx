@@ -5,25 +5,22 @@ import { UserContext } from "../context/UserContext";
 import { useNavigate, Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import dotenv from "dotenv";
 
 function LoginPage() {
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const { setUserInfo } = useContext(UserContext);
   const navigate = useNavigate();
+
   async function login(e) {
     e.preventDefault();
 
-    // Client-side validation
     if (!email || !password) {
       toast.error("Please fill out all fields");
       return;
     }
 
-    // Email format validation including the presence of "@"
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address");
@@ -34,13 +31,12 @@ function LoginPage() {
       const response = await fetch("http://localhost:8080/api/v1/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ email, password }), // Body only includes email and password
         credentials: "include",
       });
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Unauthorized error
           toast.error("Email or password does not match");
         } else {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -52,19 +48,20 @@ function LoginPage() {
       setUserInfo(userInfo);
       toast.success("Login successful! Redirecting to homepage...");
 
-      // Delay navigation to show the toast for a few seconds
+      // THIS IS THE FINAL FIX:
+      // Instead of using navigate(), we use window.location.href to force a
+      // full page reload. This clears any state issues and forces the Navbar
+      // to re-check the login status with the new cookies.
       setTimeout(() => {
-        navigate("/");
-      }, 3000); // 3 seconds delay
+        window.location.href = "/";
+      }, 2000); // 2 seconds delay to show the toast
     } catch (error) {
       console.error("Error:", error);
       toast.error("An unexpected error occurred. Please try again.");
     }
   }
 
-  // Function for Guest Login
   function loginAsGuest() {
-    // Set predefined guest credentials
     setEmail("guestuser10@gmail.com");
     setPassword("12345678");
   }
@@ -102,7 +99,6 @@ function LoginPage() {
               Log In
             </button>
           </form>
-          {/* Added Guest Login Button [NEW] */}
           <button onClick={loginAsGuest} className="guest-login-button">
             Log in as Guest
           </button>
@@ -121,3 +117,4 @@ function LoginPage() {
 }
 
 export default LoginPage;
+

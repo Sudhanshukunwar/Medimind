@@ -1,5 +1,5 @@
 {
-  "name": "predictix_backend",
+  "name": "medimind_backend",
   "version": "1.0.0",
   "type": "module",
   "description": "A web application that predicts if a patient has breast cancer, diabetes, heart disease and  lung cancer based on machine learning models.",

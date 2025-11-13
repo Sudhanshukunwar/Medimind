@@ -1,7 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -25,18 +24,7 @@ const generateAccessAndRefereshTokens = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  // get user details from frontend
-  // validation - not empty
-  // check if user already exists: username, email
-  // create user object - create entry in db
-  // remove password and refresh token field from response
-  // check for user creation
-  // return res
-
   const { fullname, email, username, password } = req.body;
-  //console.log("email: ", email);
-  console.log(req.body);
-  console.log(fullname, email, username, password);
 
   if (
     [fullname, email, username, password].some((field) => field?.trim() === "")
@@ -51,17 +39,13 @@ const registerUser = asyncHandler(async (req, res) => {
   if (existedUser) {
     throw new ApiError(409, "User with email or username already exists");
   }
-  //console.log(req.files);
-
-  //console.log(fullName);
 
   const user = await User.create({
-    username: username.toLowerCase(),
-    email,
     fullname,
+    email,
+    username: username.toLowerCase(),
     password,
   });
-  console.log("User is ", user);
 
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
@@ -77,25 +61,11 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  // req body -> data
-  // username or email
-  //find the user
-  //password check
-  //access and referesh token
-  //send cookie
-
   const { email, username, password } = req.body;
-  //console.log(email);
 
   if (!username && !email) {
     throw new ApiError(400, "username or email is required");
   }
-
-  // Here is an alternative of above code based on logic discussed in video:
-  // if (!(username || email)) {
-  //     throw new ApiError(400, "username or email is required")
-
-  // }
 
   const user = await User.findOne({
     $or: [{ username }, { email }],
@@ -104,8 +74,6 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(404, "User does not exist");
   }
-
-  //console.log(password);
 
   const isPasswordValid = await user.isPasswordCorrect(password);
 
@@ -121,11 +89,14 @@ const loginUser = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
+  // THIS IS THE FINAL FIX (Part 1):
+  // When on localhost, use sameSite: "lax". On a live website, use sameSite: "None".
+  // This resolves the browser security conflict.
   const options = {
     httpOnly: true,
-    secure: true,
-    sameSite: "None", // Allows cross-origin cookies
-    path:"/",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
+    path: "/",
   };
 
   return res
@@ -150,7 +121,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     req.user._id,
     {
       $unset: {
-        refreshToken: 1, // this removes the field from document
+        refreshToken: 1,
       },
     },
     {
@@ -158,11 +129,12 @@ const logoutUser = asyncHandler(async (req, res) => {
     }
   );
 
+  // THIS IS THE FINAL FIX (Part 2): Applying the same cookie fix here.
   const options = {
     httpOnly: true,
-    secure: true,
-    sameSite: "None", // Allows cross-origin cookies
-    path:"/",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
+    path: "/",
   };
 
   return res
@@ -195,13 +167,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     if (incomingRefreshToken !== user?.refreshToken) {
       throw new ApiError(401, "Refresh token is expired or used");
     }
-
+    
+    // THIS IS THE FINAL FIX (Part 3): Applying the same cookie fix here.
     const options = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None", // Allows cross-origin cookies
-    path:"/",
-  };
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
+      path: "/",
+    };
 
     const { accessToken, newRefreshToken } =
       await generateAccessAndRefereshTokens(user._id);
@@ -247,9 +220,9 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body;
+  const { fullname, email } = req.body; // Changed from fullName to fullname
 
-  if (!fullName || !email) {
+  if (!fullname || !email) { // Changed from fullName to fullname
     throw new ApiError(400, "All fields are required");
   }
 
@@ -257,7 +230,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        fullName,
+        fullname, // Changed from fullName to fullname
         email: email,
       },
     },
@@ -270,11 +243,10 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 const getProfile = asyncHandler(async (req, res) => {
-  const token = req.cookies.accessToken; // Ensure you are getting accessToken from cookies
-  console.log(token); // Check if token is retrieved correctly for debugging
-
+  const token = req.cookies.accessToken;
+  
   if (!token) {
-    throw new ApiError(401, "Access Token is missing");
+    return res.status(200).json(new ApiResponse(200, null, "User not logged in"));
   }
 
   try {
@@ -296,6 +268,7 @@ const getProfile = asyncHandler(async (req, res) => {
   }
 });
 
+
 export {
   registerUser,
   loginUser,
@@ -306,3 +279,4 @@ export {
   updateAccountDetails,
   getProfile,
 };
+

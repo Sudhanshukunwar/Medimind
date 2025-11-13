@@ -1,51 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
-
-import { NavLink, useNavigate } from "react-router-dom";
-import { FaBars, FaTimes } from "react-icons/fa"; // Import FaTimes for the cross icon
-import logo from "../assets/PredictiX_main_logo.png";
+import React, { useContext, useState } from "react";
+import { NavLink } from "react-router-dom";
+import { FaBars, FaTimes } from "react-icons/fa";
+import logo from "../assets/medimind-logo.png";
 import { UserContext } from "../context/UserContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function Navbar() {
-  const { userInfo, setUserInfo } = useContext(UserContext);
+  const { userInfo, setUserInfo, loading } = useContext(UserContext); // Get loading state
   const [isMobile, setIsMobile] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchProfile();
-
-    const handleResize = () => {
-      if (window.innerWidth > 954 && isMobile) {
-        setIsMobile(false);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [isMobile]);
-
-  const fetchProfile = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:8080/api/v1/users/profile",
-        {
-          credentials: "include",
-        }
-      );
-      if (response.ok) {
-        const userData = await response.json();
-        setUserInfo(userData);
-      } else {
-        setUserInfo(null);
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      setUserInfo(null);
-    }
-  };
 
   const logout = async () => {
     try {
@@ -62,17 +25,17 @@ function Navbar() {
           autoClose: 2000,
         });
         setTimeout(() => {
-          navigate("/");
+          window.location = "/"; // Reload to clear all state
         }, 2000);
-      } else {
-        console.error("Logout failed with status:", response.status);
       }
     } catch (error) {
       console.error("Logout failed with error:", error);
     }
   };
 
-  const isLoggedIn = userInfo?.data?.username;
+  // The username is inside userInfo -> data -> user -> username
+ // Replace it with this line:
+const username = userInfo?.data?.username;
 
   const toggleMobileMenu = () => {
     setIsMobile(!isMobile);
@@ -83,6 +46,11 @@ function Navbar() {
       setIsMobile(false);
     }
   };
+
+  // Don't render anything until the profile check is done
+  if (loading) {
+    return null; 
+  }
 
   return (
     <nav className="navbar">
@@ -98,7 +66,7 @@ function Navbar() {
         pauseOnHover
       />
       <div className="navbar-logo">
-        <img src={logo} alt="PredictiX" />
+        <img src={logo} alt="MediMind" />
       </div>
       <div className={`navbar-links ${isMobile ? "mobile active" : ""}`}>
         <NavLink
@@ -128,7 +96,7 @@ function Navbar() {
         >
           About us
         </NavLink>
-        {isLoggedIn ? (
+        {username ? (
           <div className={`navbar-auth ${isMobile ? "mobile" : ""}`}>
             <span
               style={{
@@ -137,16 +105,15 @@ function Navbar() {
                 fontSize: "1.2rem",
               }}
             >
-              Hello, {userInfo.data.username}
+              Hello, {username}
             </span>
-            <NavLink
-              to="/"
+            <button
               onClick={logout}
               className="btn btn-logout"
               style={{ cursor: "pointer" }}
             >
               Logout
-            </NavLink>
+            </button>
           </div>
         ) : (
           <div className={`navbar-auth ${isMobile ? "mobile" : ""}`}>
