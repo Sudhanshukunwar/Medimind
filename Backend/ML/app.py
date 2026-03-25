@@ -17,7 +17,8 @@ class CustomScaleLayer(tf.keras.layers.Layer):
         self.scale = scale
 
     def call(self, inputs):
-        return inputs * self.scale
+        # FIX: Safely handles single tensors, lists, or tuples of tensors
+        return tf.nest.map_structure(lambda x: x * self.scale, inputs)
 
     def get_config(self):
         config = super(CustomScaleLayer, self).get_config()
@@ -76,4 +77,4 @@ def predict_heart():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port)          
