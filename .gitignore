@@ -1,0 +1,22 @@
+# Root Node Modules
+node_modules/
+
+# Sub-Project Dependencies
+Frontend/node_modules/
+backend/node_modules/
+
+# Build Outputs
+Frontend/dist/
+Frontend/build/
+backend/dist/
+
+# Python / AI / ML
+ML/__pycache__/
+ML/venv/
+ML/.ipynb_checkpoints/
+*.pyc
+
+# Environment Secrets
+.env
+Frontend/.env.local
+backend/.env
