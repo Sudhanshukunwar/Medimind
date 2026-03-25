@@ -10,7 +10,7 @@ CORS(app)
 
 # --- THE BULLETPROOF BLUEPRINT ---
 # Register the layer globally so TensorFlow cannot miss it
-@tf.keras.saving.register_keras_serializable(package="Custom")
+@tf.keras.utils.register_keras_serializable(package="Custom")
 class CustomScaleLayer(tf.keras.layers.Layer):
     def __init__(self, scale=1.0, **kwargs):
         super(CustomScaleLayer, self).__init__(**kwargs)
