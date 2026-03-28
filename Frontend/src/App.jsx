@@ -10,7 +10,7 @@ import Navbar from "./components/Navbar";
 import PredictorsPage from "./pages/PredictorsPage";
 import AboutPage from "./pages/AboutPage";
 import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignUpPage";
+import SignupPage from "./pages/SignupPage";
 import HomePage from "./pages/HomePage";
 import BreastPage from "./pages/BreastPage";
 import LungPage from "./pages/LungPage";
