@@ -10,7 +10,7 @@ const AnalyticsOverview = () => {
         const fetchStats = async () => {
             try {
                 // Fetching from port 8080 as per your previous setup
-                const res = await axios.get('http://localhost:8080/api/v1/history/all', { withCredentials: true });
+                const res = await axios.get('import.meta.env.VITE_API_URL + "/api/v1/history/all', { withCredentials: true });
                 const counts = res.data.data.reduce((acc, curr) => {
                     acc[curr.testType] = (acc[curr.testType] || 0) + 1;
                     return acc;

@@ -123,7 +123,7 @@ Make sure you're in the Backend folder and (venv) is active.
 npm run dev
 
 
-You'll see a message that it's running on http://localhost:8080.
+You'll see a message that it's running on import.meta.env.VITE_API_URL + ".
 
 Terminal 2 (Your Frontend):
 

@@ -56,7 +56,7 @@ const LungPage = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/v1/predict/lung-pred",
+        import.meta.env.VITE_API_URL + "/api/v1/predict/lung-pred",
         {
           method: "POST",
           body: formDataToSend,

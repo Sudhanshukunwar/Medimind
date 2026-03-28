@@ -5,7 +5,7 @@ const HistoryTable = () => {
     const [history, setHistory] = useState([]);
 
     useEffect(() => {
-        axios.get('http://localhost:8080/api/v1/history/all', { withCredentials: true })
+        axios.get('import.meta.env.VITE_API_URL + "/api/v1/history/all', { withCredentials: true })
             .then(res => setHistory(res.data.data))
             .catch(err => console.log(err));
     }, []);

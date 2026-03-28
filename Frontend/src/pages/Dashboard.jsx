@@ -10,7 +10,7 @@ const Dashboard = () => {
         const fetchDashboardData = async () => {
             try {
                 // Adjust this URL to match your backend port
-                const response = await axios.get('http://localhost:8080/api/v1/history/all', { withCredentials: true });
+                const response = await axios.get('import.meta.env.VITE_API_URL + "/api/v1/history/all', { withCredentials: true });
                 setHistory(response.data.data);
 
                 // Format data for the Pie Chart
