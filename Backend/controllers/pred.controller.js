@@ -1,12 +1,11 @@
-import { spawn } from "child_process";
 import { fileURLToPath } from "url";
-import { dirname, resolve } from "path";
+import { dirname } from "path";
 import path from "path";
 import fs from "fs";
 import multer from "multer";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
-import { History } from "../models/history.model.js"; // Import the new model
+import { History } from "../models/history.model.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,12 +28,9 @@ const deleteFile = (filePath) => {
   });
 };
 
-const pythonExecutable = resolve(__dirname, "..", "venv", "Scripts", "python.exe");
-
-// --- NEW HELPER: Safe Save to Database ---
 const saveToHistory = async (userId, testType, result) => {
   try {
-    if (!userId) return; // Skip if no user logged in (guest mode)
+    if (!userId) return; 
     await History.create({
       owner: userId,
       testType,
@@ -43,137 +39,132 @@ const saveToHistory = async (userId, testType, result) => {
     console.log(`History saved: ${testType} for user ${userId}`);
   } catch (error) {
     console.error("Database Save Failed (History):", error.message);
-    // We don't throw error here so the user still gets their prediction
   }
 };
 
-// Prediction Controllers 
+// ==========================================
+// Prediction Controllers (Cloud Connected)
+// ==========================================
 
 const heartpred = asyncHandler(async (req, res) => {
   const { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13 } = req.body;
   const transformedP2 = isNaN(p2) ? (p2.toLowerCase() === "male" ? 1 : 0) : p2;
   const transformedP6 = isNaN(p6) ? (p6.toLowerCase() === "yes" ? 1 : 0) : p6;
 
-  const scriptPath = resolve(__dirname, "../ML/Heart Disease Prediction/heartpredict.py");
-  const inputData = [p1, transformedP2, p3, p4, p5, transformedP6, p7, p8, p9, p10, p11, p12, p13];
-
-  const pythonProcess = spawn(pythonExecutable, [scriptPath, ...inputData]);
-
-  let predictionVal = "";
-  let errorData = "";
-
-  pythonProcess.stdout.on("data", (data) => (predictionVal += data.toString()));
-  pythonProcess.stderr.on("data", (data) => (errorData += data.toString()));
-
-  pythonProcess.on("close", async (code) => {
-    if (code !== 0) {
-      console.error("Heart prediction stderr:", errorData);
-      return res.status(500).json({ message: "Prediction script failed", details: errorData });
-    }
-    predictionVal = predictionVal.trim();
-    let finalResult = predictionVal === "1" ? "Suffering from Heart Disease" : "Not suffering from Heart Disease";
+  try {
+    // Convert strings to numbers for the model
+    const inputArray = [Number(p1), transformedP2, Number(p3), Number(p4), Number(p5), transformedP6, Number(p7), Number(p8), Number(p9), Number(p10), Number(p11), Number(p12), Number(p13)];
     
-    // Save to History
+    const response = await fetch(`${process.env.ML_API_URL}/predict/heart`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: inputArray })
+    });
+    
+    const data = await response.json();
+    let finalResult = data.prediction == 1 ? "Suffering from Heart Disease" : "Not suffering from Heart Disease";
+    
     await saveToHistory(req.user?._id, "Heart Disease", finalResult);
-
-    return res.json({ prediction: predictionVal, result: finalResult });
-  });
+    return res.json({ prediction: data.prediction, result: finalResult });
+  } catch (error) {
+    console.error("Heart Cloud Engine Error:", error);
+    return res.status(500).json({ message: "Cloud Prediction failed", details: error.message });
+  }
 });
 
 const diabetespred = asyncHandler(async (req, res) => {
   const { pregnancies, glucose, bloodPressure, skinThickness, insulin, bmi, diabetesPedigreeFunction, age } = req.body;
 
-  const scriptPath = resolve(__dirname, "../ML/Diabetes Prediction/diabetespredict.py");
-  const inputData = [pregnancies, glucose, bloodPressure, skinThickness, insulin, bmi, diabetesPedigreeFunction, age];
+  try {
+    const inputArray = [Number(pregnancies), Number(glucose), Number(bloodPressure), Number(skinThickness), Number(insulin), Number(bmi), Number(diabetesPedigreeFunction), Number(age)];
+    
+    const response = await fetch(`${process.env.ML_API_URL}/predict/diabetes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: inputArray }) 
+    });
 
-  const pythonProcess = spawn(pythonExecutable, [scriptPath, ...inputData]);
+    const data = await response.json();
+    let finalResult = data.prediction == 1 ? "Suffering from Diabetes" : "Not suffering from Diabetes";
 
-  let predictionVal = "";
-  let errorData = "";
-
-  pythonProcess.stdout.on("data", (data) => (predictionVal += data.toString()));
-  pythonProcess.stderr.on("data", (data) => (errorData += data.toString()));
-
-  pythonProcess.on("close", async (code) => {
-    if (code !== 0) {
-      console.error("Diabetes prediction stderr:", errorData);
-      return res.status(500).json({ message: "Prediction script failed", details: errorData });
-    }
-    predictionVal = predictionVal.trim();
-    let finalResult = predictionVal === "1" ? "Suffering from Diabetes" : "Not suffering from Diabetes";
-
-    // Save to History
     await saveToHistory(req.user?._id, "Diabetes", finalResult);
-
-    return res.json({ prediction: predictionVal, result: finalResult });
-  });
+    return res.json({ prediction: data.prediction, result: finalResult });
+  } catch (error) {
+    console.error("Diabetes Cloud Engine Error:", error);
+    return res.status(500).json({ message: "Cloud Prediction failed", details: error.message });
+  }
 });
 
 const lungpred = asyncHandler(async (req, res) => {
   if (!req.file) throw new ApiError(400, "No image file uploaded");
   const filePath = req.file.path;
-  const scriptPath = resolve(__dirname, "../ML/Lung Cancer Prediction/predict.py");
 
-  const pythonProcess = spawn(pythonExecutable, [scriptPath, filePath]);
+  try {
+    const fileBuffer = fs.readFileSync(filePath);
+    const blob = new Blob([fileBuffer], { type: req.file.mimetype });
+    const formData = new FormData();
+    formData.append("file", blob, req.file.originalname);
 
-  let predictionData = "";
-  let errorData = "";
+    const response = await fetch(`${process.env.ML_API_URL}/predict/lung`, {
+      method: "POST",
+      body: formData
+    });
 
-  pythonProcess.stdout.on("data", (data) => (predictionData += data.toString()));
-  pythonProcess.stderr.on("data", (data) => (errorData += data.toString()));
-
-  pythonProcess.on("close", async (code) => {
-    deleteFile(filePath); 
-    if (code !== 0) {
-      console.error("Lung prediction stderr:", errorData);
-      return res.status(500).json({ error: "Prediction script failed", details: errorData });
-    }
-    predictionData = predictionData.trim();
-
+    const data = await response.json();
+    let predictionData = data.prediction ? data.prediction.trim() : "";
+    
     let finalResult = "";
-    if (predictionData.endsWith("cancerous") && !predictionData.endsWith("non-cancerous")) {
+    if (predictionData === "cancerous") {
         finalResult = "Suffering from Lung Cancer";
-    } else if (predictionData.endsWith("non-cancerous")) {
+    } else if (predictionData === "non-cancerous") {
         finalResult = "Not suffering from Lung Cancer";
+    } else {
+        finalResult = predictionData; // Fallback
     }
 
     if (finalResult) {
-        // Save to History
         await saveToHistory(req.user?._id, "Lung Cancer", finalResult);
+        deleteFile(filePath); 
         return res.status(200).json({ prediction: finalResult });
     }
-
+    
+    deleteFile(filePath);
     return res.status(500).json({ error: "Unexpected prediction result", details: predictionData });
-  });
+
+  } catch (error) {
+    deleteFile(filePath);
+    console.error("Lung Cloud Engine Error:", error);
+    return res.status(500).json({ error: "Cloud Prediction failed", details: error.message });
+  }
 });
 
 const breastpred = asyncHandler(async (req, res) => {
   if (!req.file) throw new ApiError(400, "No image file uploaded");
   const filePath = req.file.path;
-  const scriptPath = resolve(__dirname, "../ML/Breast Cancer Prediction/breast_cancer_prediction.py");
 
-  const pythonProcess = spawn(pythonExecutable, [scriptPath, filePath]);
+  try {
+    const fileBuffer = fs.readFileSync(filePath);
+    const blob = new Blob([fileBuffer], { type: req.file.mimetype });
+    const formData = new FormData();
+    formData.append("file", blob, req.file.originalname);
 
-  let predictionData = "";
-  let errorData = "";
+    const response = await fetch(`${process.env.ML_API_URL}/predict/breast`, {
+      method: "POST",
+      body: formData
+    });
 
-  pythonProcess.stdout.on("data", (data) => (predictionData += data.toString()));
-  pythonProcess.stderr.on("data", (data) => (errorData += data.toString()));
-
-  pythonProcess.on("close", async (code) => {
-    deleteFile(filePath);
-    if (code !== 0) {
-      console.error("Breast prediction stderr:", errorData);
-      return res.status(500).json({ error: "Prediction script failed", details: errorData });
-    }
-
-    let finalResult = predictionData.trim();
+    const data = await response.json();
+    let finalResult = data.prediction ? data.prediction.trim() : "Prediction Error";
     
-    // Save to History
     await saveToHistory(req.user?._id, "Breast Cancer", finalResult);
-
+    deleteFile(filePath);
     return res.status(200).json({ prediction: finalResult });
-  });
+
+  } catch (error) {
+    deleteFile(filePath);
+    console.error("Breast Cloud Engine Error:", error);
+    return res.status(500).json({ error: "Cloud Prediction failed", details: error.message });
+  }
 });
 
 export { heartpred, diabetespred, lungpred, breastpred };
