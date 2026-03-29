@@ -9,6 +9,11 @@ import express from "express";
 
 dotenv.config({ path: "./env" });
 
+// --- ADD THESE TWO LINES HERE TO FIX THE "FALSE RESULTS" ---
+app.use(express.json({ limit: "50mb" })); 
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+// -----------------------------------------------------------
+
 const _dirname = path.dirname("");
 const frontendBP = path.join(_dirname, "../Frontend/dist");
 app.use(express.static(frontendBP));
@@ -18,16 +23,13 @@ function getLocalIpAddress() {
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
     for (const iface of interfaces[name]) {
-      // Skip over internal (i.e., 127.0.0.1) and non-IPv4 addresses
       if (iface.family === "IPv4" && !iface.internal) {
         return iface.address;
       }
     }
   }
-  return "http://localhost/"; // Fallback to localhost if no external IPv4 address is found
+  return "http://localhost/"; 
 }
-
-
 
 connectDB()
   .then(() => {

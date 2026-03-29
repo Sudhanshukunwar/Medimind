@@ -4,3 +4,7 @@ tensorflow
 numpy
 scikit-learn
 gunicorn
+pymupdf
+pandas
+pymupdf
+pandas

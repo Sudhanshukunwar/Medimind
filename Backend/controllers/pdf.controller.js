@@ -18,7 +18,10 @@ const deleteFile = (filePath, message) => {
 // --- THIS IS THE FIX: Define the absolute path to the Python in your venv ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const pythonExecutable = resolve(__dirname, "..", "venv", "Scripts", "python.exe");
+// This tells the server: "If on Windows, use the venv. If on Render (Linux), just use 'python3'"
+const pythonExecutable = process.platform === "win32" 
+    ? resolve(__dirname, "..", "venv", "Scripts", "python.exe") 
+    : "python3";
 
 const createScraper = (scriptName) => {
   return (req, res) => {
