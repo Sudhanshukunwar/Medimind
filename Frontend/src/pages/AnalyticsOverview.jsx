@@ -9,12 +9,19 @@ const AnalyticsOverview = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                // Fetching from port 8080 as per your previous setup
-                const res = await axios.get('import.meta.env.VITE_API_URL + "/api/v1/history/all', { withCredentials: true });
-                const counts = res.data.data.reduce((acc, curr) => {
+                // FIXED: Using backticks and template literal for the URL
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/history/all`, { 
+                    withCredentials: true 
+                });
+
+                // FIXED: Added safety fallback (|| []) to prevent .reduce crash
+                const historyData = res.data?.data || [];
+                
+                const counts = historyData.reduce((acc, curr) => {
                     acc[curr.testType] = (acc[curr.testType] || 0) + 1;
                     return acc;
                 }, {});
+
                 setStats(Object.keys(counts).map(key => ({ name: key, value: counts[key] })));
             } catch (err) {
                 console.error("Stats fetch error", err);
