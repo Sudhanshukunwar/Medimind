@@ -48,13 +48,31 @@ const saveToHistory = async (userId, testType, result) => {
 
 const heartpred = asyncHandler(async (req, res) => {
   const { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13 } = req.body;
-  const transformedP2 = isNaN(p2) ? (p2.toLowerCase() === "male" ? 1 : 0) : p2;
-  const transformedP6 = isNaN(p6) ? (p6.toLowerCase() === "yes" ? 1 : 0) : p6;
+
+  // 🛡️ FIX: Robustly convert categorical strings to pure numbers
+  const transformedP2 = p2?.toString().toLowerCase() === "male" ? 1 : (p2?.toString().toLowerCase() === "female" ? 0 : Number(p2));
+  const transformedP6 = p6?.toString().toLowerCase() === "yes" ? 1 : (p6?.toString().toLowerCase() === "no" ? 0 : Number(p6));
 
   try {
-    // Convert strings to numbers for the model
-    const inputArray = [Number(p1), transformedP2, Number(p3), Number(p4), Number(p5), transformedP6, Number(p7), Number(p8), Number(p9), Number(p10), Number(p11), Number(p12), Number(p13)];
+    // 🛡️ FIX: Force every single value to be a pure Number/Float
+    const inputArray = [
+      Number(p1) || 0, 
+      Number(transformedP2) || 0, 
+      Number(p3) || 0, 
+      Number(p4) || 0, 
+      Number(p5) || 0, 
+      Number(transformedP6) || 0, 
+      Number(p7) || 0, 
+      Number(p8) || 0, 
+      Number(p9) || 0, 
+      Number(p10) || 0, 
+      Number(p11) || 0, 
+      Number(p12) || 0, 
+      Number(p13) || 0
+    ];
+
     console.log("--- ACCURACY AUDIT --- Data being sent to AI:", inputArray);
+
     const response = await fetch(`${process.env.ML_API_URL}/predict/heart`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -76,8 +94,20 @@ const diabetespred = asyncHandler(async (req, res) => {
   const { pregnancies, glucose, bloodPressure, skinThickness, insulin, bmi, diabetesPedigreeFunction, age } = req.body;
 
   try {
-    const inputArray = [Number(pregnancies), Number(glucose), Number(bloodPressure), Number(skinThickness), Number(insulin), Number(bmi), Number(diabetesPedigreeFunction), Number(age)];
+    // 🛡️ FIX: Ensure decimals (BMI, Pedigree) remain floats and avoid strings
+    const inputArray = [
+      Number(pregnancies) || 0, 
+      Number(glucose) || 0, 
+      Number(bloodPressure) || 0, 
+      Number(skinThickness) || 0, 
+      Number(insulin) || 0, 
+      Number(bmi) || 0, 
+      Number(diabetesPedigreeFunction) || 0, 
+      Number(age) || 0
+    ];
+
     console.log("--- ACCURACY AUDIT --- Data being sent to AI:", inputArray);
+
     const response = await fetch(`${process.env.ML_API_URL}/predict/diabetes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -119,7 +149,7 @@ const lungpred = asyncHandler(async (req, res) => {
     } else if (predictionData === "non-cancerous") {
         finalResult = "Not suffering from Lung Cancer";
     } else {
-        finalResult = predictionData; // Fallback
+        finalResult = predictionData;
     }
 
     if (finalResult) {
@@ -146,7 +176,7 @@ const breastpred = asyncHandler(async (req, res) => {
     const fileBuffer = fs.readFileSync(filePath);
     const blob = new Blob([fileBuffer], { type: req.file.mimetype });
     const formData = new FormData();
-    formData.append("file", blob, req.file.originalname);
+    formData.append("formData", blob, req.file.originalname);
 
     const response = await fetch(`${process.env.ML_API_URL}/predict/breast`, {
       method: "POST",
