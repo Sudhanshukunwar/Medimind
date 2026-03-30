@@ -54,7 +54,7 @@ const heartpred = asyncHandler(async (req, res) => {
   try {
     // Convert strings to numbers for the model
     const inputArray = [Number(p1), transformedP2, Number(p3), Number(p4), Number(p5), transformedP6, Number(p7), Number(p8), Number(p9), Number(p10), Number(p11), Number(p12), Number(p13)];
-    
+    console.log("--- ACCURACY AUDIT --- Data being sent to AI:", inputArray);
     const response = await fetch(`${process.env.ML_API_URL}/predict/heart`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -77,7 +77,7 @@ const diabetespred = asyncHandler(async (req, res) => {
 
   try {
     const inputArray = [Number(pregnancies), Number(glucose), Number(bloodPressure), Number(skinThickness), Number(insulin), Number(bmi), Number(diabetesPedigreeFunction), Number(age)];
-    
+    console.log("--- ACCURACY AUDIT --- Data being sent to AI:", inputArray);
     const response = await fetch(`${process.env.ML_API_URL}/predict/diabetes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
