@@ -3,42 +3,35 @@ import pickle
 import numpy as np
 import os
 import warnings
+import sklearn
+import numpy
 
+# Silence the version warnings so the logs stay clean
 from sklearn.exceptions import ConvergenceWarning
-
 warnings.filterwarnings("ignore", category=UserWarning, module='sklearn')
 warnings.filterwarnings("ignore", category=FutureWarning, module='sklearn')
-warnings.filterwarnings("ignore", category=DeprecationWarning, module='sklearn')
 
-# Get the directory of the current script
 script_dir = os.path.dirname(os.path.realpath(__file__))
-
-# Define paths to model and scaler files
 model_file = os.path.join(script_dir, 'diabetes_model.pkl')
 scaler_file = os.path.join(script_dir, 'scaler.pkl')
 
-# Load the model
 with open(model_file, 'rb') as file:
     classifier = pickle.load(file)
-
-# Load the scaler
 with open(scaler_file, 'rb') as file:
     scaler = pickle.load(file)
 
-# Get the input data from the command line arguments
+# 1. DATA AUDIT: See exactly what Node.js is sending
 input_data = list(map(float, sys.argv[1:]))
+print(f"--- DATA AUDIT ---")
+print(f"RAW INPUT FROM NODE: {input_data}")
 
-# Change the input_data to a numpy array
-input_data_as_numpy_array = np.asarray(input_data)
+input_data_reshaped = np.asarray(input_data).reshape(1, -1)
 
-# Reshape the array as we are predicting for one instance
-input_data_reshaped = input_data_as_numpy_array.reshape(1, -1)
-
-# Standardize the input data
+# 2. SCALING AUDIT: See how the AI "sees" these numbers
 std_data = scaler.transform(input_data_reshaped)
+print(f"SCALED DATA (Internal Math): {std_data}")
 
-# Make the prediction
 prediction = classifier.predict(std_data)
 
-# Output the prediction
+# 3. FINAL OUTPUT (Keep this for Node.js to read)
 print(prediction[0])
