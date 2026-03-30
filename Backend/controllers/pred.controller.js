@@ -49,29 +49,17 @@ const saveToHistory = async (userId, testType, result) => {
 const heartpred = asyncHandler(async (req, res) => {
   const { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13 } = req.body;
 
-  // 🛡️ FIX: Robustly convert categorical strings to pure numbers
   const transformedP2 = p2?.toString().toLowerCase() === "male" ? 1 : (p2?.toString().toLowerCase() === "female" ? 0 : Number(p2));
   const transformedP6 = p6?.toString().toLowerCase() === "yes" ? 1 : (p6?.toString().toLowerCase() === "no" ? 0 : Number(p6));
 
   try {
-    // 🛡️ FIX: Force every single value to be a pure Number/Float
     const inputArray = [
-      Number(p1) || 0, 
-      Number(transformedP2) || 0, 
-      Number(p3) || 0, 
-      Number(p4) || 0, 
-      Number(p5) || 0, 
-      Number(transformedP6) || 0, 
-      Number(p7) || 0, 
-      Number(p8) || 0, 
-      Number(p9) || 0, 
-      Number(p10) || 0, 
-      Number(p11) || 0, 
-      Number(p12) || 0, 
-      Number(p13) || 0
+      Number(p1) || 0, Number(transformedP2) || 0, Number(p3) || 0, Number(p4) || 0, 
+      Number(p5) || 0, Number(transformedP6) || 0, Number(p7) || 0, Number(p8) || 0, 
+      Number(p9) || 0, Number(p10) || 0, Number(p11) || 0, Number(p12) || 0, Number(p13) || 0
     ];
 
-    console.log("--- ACCURACY AUDIT --- Data being sent to AI:", inputArray);
+    console.log("--- HEART AUDIT --- Data sent:", inputArray);
 
     const response = await fetch(`${process.env.ML_API_URL}/predict/heart`, {
       method: "POST",
@@ -80,6 +68,10 @@ const heartpred = asyncHandler(async (req, res) => {
     });
     
     const data = await response.json();
+    
+    // 🛡️ LOG THE FULL RESPONSE
+    console.log("--- HEART ML API FULL RESPONSE ---", data);
+
     let finalResult = data.prediction == 1 ? "Suffering from Heart Disease" : "Not suffering from Heart Disease";
     
     await saveToHistory(req.user?._id, "Heart Disease", finalResult);
@@ -94,19 +86,13 @@ const diabetespred = asyncHandler(async (req, res) => {
   const { pregnancies, glucose, bloodPressure, skinThickness, insulin, bmi, diabetesPedigreeFunction, age } = req.body;
 
   try {
-    // 🛡️ FIX: Ensure decimals (BMI, Pedigree) remain floats and avoid strings
     const inputArray = [
-      Number(pregnancies) || 0, 
-      Number(glucose) || 0, 
-      Number(bloodPressure) || 0, 
-      Number(skinThickness) || 0, 
-      Number(insulin) || 0, 
-      Number(bmi) || 0, 
-      Number(diabetesPedigreeFunction) || 0, 
-      Number(age) || 0
+      Number(pregnancies) || 0, Number(glucose) || 0, Number(bloodPressure) || 0, 
+      Number(skinThickness) || 0, Number(insulin) || 0, Number(bmi) || 0, 
+      Number(diabetesPedigreeFunction) || 0, Number(age) || 0
     ];
 
-    console.log("--- ACCURACY AUDIT --- Data being sent to AI:", inputArray);
+    console.log("--- DIABETES AUDIT --- Data sent:", inputArray);
 
     const response = await fetch(`${process.env.ML_API_URL}/predict/diabetes`, {
       method: "POST",
@@ -115,6 +101,10 @@ const diabetespred = asyncHandler(async (req, res) => {
     });
 
     const data = await response.json();
+
+    // 🛡️ LOG THE FULL RESPONSE TO SEE THE PYTHON MATH
+    console.log("--- DIABETES ML API FULL RESPONSE ---", data);
+
     let finalResult = data.prediction == 1 ? "Suffering from Diabetes" : "Not suffering from Diabetes";
 
     await saveToHistory(req.user?._id, "Diabetes", finalResult);
@@ -141,6 +131,8 @@ const lungpred = asyncHandler(async (req, res) => {
     });
 
     const data = await response.json();
+    console.log("--- LUNG ML API FULL RESPONSE ---", data);
+
     let predictionData = data.prediction ? data.prediction.trim() : "";
     
     let finalResult = "";
@@ -176,7 +168,9 @@ const breastpred = asyncHandler(async (req, res) => {
     const fileBuffer = fs.readFileSync(filePath);
     const blob = new Blob([fileBuffer], { type: req.file.mimetype });
     const formData = new FormData();
-    formData.append("formData", blob, req.file.originalname);
+    
+    // 🛡️ FIXED: Changed "formData" key to "file" to match standard ML API expectations
+    formData.append("file", blob, req.file.originalname);
 
     const response = await fetch(`${process.env.ML_API_URL}/predict/breast`, {
       method: "POST",
@@ -184,6 +178,8 @@ const breastpred = asyncHandler(async (req, res) => {
     });
 
     const data = await response.json();
+    console.log("--- BREAST ML API FULL RESPONSE ---", data);
+
     let finalResult = data.prediction ? data.prediction.trim() : "Prediction Error";
     
     await saveToHistory(req.user?._id, "Breast Cancer", finalResult);
