@@ -115,8 +115,19 @@ const LungPage = () => {
       const fields = [
         { label: "Name:", value: formData.name, size: 14 },
         { label: "Age:", value: formData.age, size: 14 },
-        { label: "Gender:", value: formData.gender, size: 14 },
-        { label: "Prediction Result:", value: predictionResult, size: 16 },
+        { 
+          label: "Gender:", 
+          value: formData.gender === "M" ? "Male" : "Female", 
+          size: 14 
+        },
+        { 
+          label: "Prediction Result:", 
+          // FIXED: Changed logic to check for "non-cancerous"
+          value: predictionResult.includes("non-cancerous")
+            ? "The person is not suffering from Lung Cancer."
+            : "The person is suffering from Lung Cancer.", 
+          size: 16 
+        },
       ];
 
       let yOffset = height - 250;
@@ -257,37 +268,6 @@ const LungPage = () => {
               </div>
             )}
           </div>
-
-          {showDummyModal && (
-            <div className="modal-overlay">
-              <div className="modal-content">
-                <h2>Download Dummy Lung Images</h2>
-                <p>Use these sample CT scans for testing:</p>
-                <div className="modal-links">
-                  <a
-                    href="/dummy/lung/suffering.zip"
-                    download
-                    className="lung-page-button"
-                  >
-                    Suffering
-                  </a>
-                  <a
-                    href="/dummy/lung/non_suffering.zip"
-                    download
-                    className="lung-page-button"
-                  >
-                    Not Suffering
-                  </a>
-                </div>
-                <button
-                  className="lung-page-button close-btn"
-                  onClick={() => setShowDummyModal(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )}
         </form>
       ) : (
         <div className="lung-page-result-container">
@@ -299,12 +279,16 @@ const LungPage = () => {
           <p>Gender: {formData.gender === "M" ? "Male" : "Female"}</p>
           <p
             className={`prediction-text ${
-              predictionResult.includes("not suffering")
+              // FIXED: Changed logic to check for "non-cancerous"
+              predictionResult.includes("non-cancerous")
                 ? "no-lung-disease"
                 : "lung-disease"
             }`}
           >
-            {predictionResult}
+            {/* FIXED: Changed text to be descriptive */}
+            {predictionResult.includes("non-cancerous")
+              ? "The person is not suffering from Lung Cancer."
+              : "The person is suffering from Lung Cancer."}
           </p>
           <div className="lung-page-buttons-container">
             <button className="lung-page-button" onClick={handleRePredict}>
