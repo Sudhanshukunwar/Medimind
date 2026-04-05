@@ -124,7 +124,8 @@ const BreastPage = () => {
         },
         {
           label: "Prediction Result:",
-          value: predictionResult.includes("not suffering")
+          // FIXED: Changed "not suffering" to "non-cancerous"
+          value: predictionResult.includes("non-cancerous")
             ? "The person is not suffering from Breast Cancer."
             : "The person is suffering from Breast Cancer.",
           size: 16,
@@ -282,12 +283,14 @@ const BreastPage = () => {
           <p>Gender: {formData.gender === "M" ? "Male" : "Female"}</p>
           <p
             className={`prediction-text ${
-              predictionResult.includes("not suffering")
+              // FIXED: Changed "not suffering" to "non-cancerous"
+              predictionResult.includes("non-cancerous")
                 ? "no-breast-cancer"
                 : "breast-cancer"
             }`}
           >
-            {predictionResult.includes("not suffering")
+            {/* FIXED: Changed "not suffering" to "non-cancerous" */}
+            {predictionResult.includes("non-cancerous")
               ? "The person is not suffering from Breast Cancer."
               : "The person is suffering from Breast Cancer."}
           </p>
