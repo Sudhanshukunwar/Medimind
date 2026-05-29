@@ -169,7 +169,7 @@ const breastpred = asyncHandler(async (req, res) => {
     const blob = new Blob([fileBuffer], { type: req.file.mimetype });
     const formData = new FormData();
     
-    // 🛡️ FIXED: Changed "formData" key to "file" to match standard ML API expectations
+    // FIXED: Changed "formData" key to "file" to match standard ML API expectations
     formData.append("file", blob, req.file.originalname);
 
     const response = await fetch(`${process.env.ML_API_URL}/predict/breast`, {

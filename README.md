@@ -1,150 +1,134 @@
-👋 Hey! Welcome to MediMind 🧠
+MediMind
 
-This is my university project, MediMind! It's an AI-powered website I built to show how we can use machine learning to help predict serious health conditions.
+Welcome to MediMind
 
-It's a complete full-stack application, which means it has a pretty frontend (what you see) and a really complex backend (what does all the work). The backend is a cool mix of Node.js for the website stuff and Python for all the heavy-duty AI "thinking."
+This is my project, MediMind. It is an AI-powered healthcare application built to demonstrate how machine learning and artificial intelligence can be used to help predict serious health conditions.
 
-✨ What Can It Do?
+It is a complete full-stack application consisting of a modern frontend and a powerful backend. The backend combines Node.js for web functionality and Python for machine learning and artificial intelligence processing.
 
-I'm glad you asked! The app is built around four main predictors:
+What Can It Do?
 
-Heart Disease: You can input a patient's data (like cholesterol, age, etc.), and it'll predict the likelihood of heart disease.
+The application includes four main prediction modules:
 
-Diabetes: This one uses a Naive Bayes model (a classic AI algorithm) to predict diabetes from patient info.
+Heart Disease Prediction
 
-Lung Cancer: This is one of the deep learning models. You can upload a CT scan image, and the AI (a TensorFlow/Keras model) will analyze it to detect signs of lung cancer.
+Users can enter patient information such as age, cholesterol levels, and other medical parameters to predict the likelihood of heart disease.
 
-Breast Cancer: Similar to the lung model, this one uses a deep learning model to analyze histological images (microscope slides) for breast cancer.
+Diabetes Prediction
 
-On top of that, I've also built in:
+This module uses a Naive Bayes machine learning model to predict diabetes based on patient data.
 
-Full User Accounts: You can sign up and log in securely.
+Lung Cancer Detection
 
-Your Own PDF Reports: After you get a prediction, you can download a personalized PDF report. I even made it add our "MediMind" logo and the current date to the report!
+Users can upload CT scan images, which are analyzed by a TensorFlow/Keras deep learning model to detect possible signs of lung cancer.
 
-Custom Branding: I fully rebranded the original project with our new "MediMind" logo, colors, and our team page.
+Breast Cancer Detection
 
-Works on Mobile: The whole site is responsive, so it looks good on your phone, too.
+This module uses a deep learning model to analyze histopathological images and identify indications of breast cancer.
 
-🛠️ How It's Built (The Tech Stack)
+Additional Features
 
-This was the tricky part! It's not just one website; it's two separate applications working together.
+User Authentication
 
-The Frontend (What You See)
+Secure user registration and login functionality.
 
-React.js: This is what makes the website feel fast and modern without reloading all the time.
+PDF Report Generation
 
-React Router: Handles switching between pages (like Home, About, Predictors).
+After receiving a prediction, users can download a personalized PDF report containing the MediMind logo and the current date.
 
-pdf-lib: A neat little library I used to build the PDF reports right in your browser.
+Custom Branding
 
-CSS: All the custom styling, animations, and branding you see.
+The project has been fully customized with the MediMind logo, color scheme, and user interface design.
 
-The Backend (The "Kitchen")
+Responsive Design
 
-Node.js & Express.js: This is the main server. It handles things like user logins, file uploads, and talking to the frontend.
+The application is fully responsive and optimized for desktop and mobile devices.
 
-Python: This is the "brain" where the actual AI lives.
+Technology Stack
 
-child_process (The "Magic" Part): This is the bridge. When you ask for a prediction, the Node.js server uses this to "call up" a Python script, send it your data, get the AI's answer, and then send that answer back to you.
+Frontend
 
-The "Brain" Itself (The Python ML)
+• React.js – Creates a fast and interactive user interface.
 
-TensorFlow & Keras: For the big, complex deep learning models that look at images (Lung and Breast Cancer).
+• React Router – Handles navigation between pages.
 
-Scikit-learn: For the more "classic" AI models like Naive Bayes (which we used for Diabetes).
+• pdf-lib – Generates personalized PDF reports directly in the browser.
 
-Pandas & NumPy: The workhorses for organizing all the data before feeding it to the models.
+• CSS – Provides custom styling, animations, and responsive layouts.
 
-Joblib: This is how I saved and loaded the trained models so they're ready to make predictions instantly.
+Backend
 
-🚀 How to Run This Project Yourself
+• Node.js and Express.js – Handle user authentication, file uploads, API requests, and communication with the frontend.
 
-If you want to run this on your own computer, you have to set up both the backend and frontend. It's like starting a car engine and turning on the radio—they're two separate things.
+• Python – Performs machine learning and artificial intelligence processing.
 
-What You'll Need
+• child_process – Acts as a bridge between Node.js and Python, allowing the server to execute Python scripts and retrieve prediction results.
 
-Node.js (v18 or later)
+Machine Learning Technologies
 
-Python (v3.11 or later)
+• TensorFlow and Keras – Used for deep learning models that analyze medical images for lung and breast cancer detection.
 
-Git (for downloading the code)
+• Scikit-learn – Used for traditional machine learning models such as the Naive Bayes classifier for diabetes prediction.
 
-The Setup Guide
+• Pandas and NumPy – Used for data preprocessing and data manipulation.
 
-1. Download the Code
+• Joblib – Used to save and load trained machine learning models efficiently.
 
-git clone [https://github.com/your-username/MediMind.git](https://github.com/your-username/MediMind.git)
+Project Setup and Installation
+
+Requirements
+
+• Node.js (Version 18 or later)
+
+• Python (Version 3.11 or later)
+
+• Git
+
+Clone the Repository
+
+git clone https://github.com/your-username/MediMind.git
+
 cd MediMind
 
+Backend Setup
 
-2. Set Up the Backend (Do this in Terminal 1)
-This is the most important part. Get this working first.
-
-# 1. Go into the backend folder
 cd Backend
 
-# 2. Install all the Node.js parts
 npm install
 
-# 3. Create a fresh Python "toolbox" (a virtual environment)
 python -m venv venv
 
-# 4. Activate that toolbox
-# On Windows:
-.\venv\Scripts\activate
-# On Mac/Linux:
-# source venv/bin/activate
+Activate the virtual environment:
 
-# 5. Install all the Python magic
-# (You must see (venv) in your terminal for this to work!)
+Windows:
+
+.\venv\Scripts\activate
+
+macOS/Linux:
+
+source venv/bin/activate
+
+Install Python dependencies:
+
 pip install -r requirements.txt
 
+Frontend Setup
 
-3. Set Up the Frontend (Do this in Terminal 2)
-Open a brand new, second terminal for this.
-
-# 1. From the main "MediMind" folder, go to the frontend
 cd Frontend
 
-# 2. Install all the React parts
 npm install
 
+Running the Project
 
-🏃‍♂️ Let's Run It!
+Backend Server:
 
-You need to keep both terminals open at the same time.
-
-Terminal 1 (Your Backend):
-
-Make sure you're in the Backend folder and (venv) is active.
-
-# This starts the "brain"
 npm run dev
 
+Frontend Server:
 
-You'll see a message that it's running on import.meta.env.VITE_API_URL + ".
-
-Terminal 2 (Your Frontend):
-
-Make sure you're in the Frontend folder.
-
-# This starts the website
 npm run dev
 
+The application will be available at:
 
-Your browser will automatically open to http://localhost:5173.
-
-And that's it! You can now use the full website on your local machine.
-
-🧑‍💻 The Team
-
-This project was fixed, rebranded, and put together by:
-
-Sudhanshu Kunwar
-
-Aryan Kushwaha
-
-Abhishek Kumhar
-
-Ambikesh Mishra
+http://localhost:5173
+https://medimind-three.vercel.app/

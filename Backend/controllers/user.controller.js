@@ -24,7 +24,7 @@ const generateAccessAndRefereshTokens = async (userId) => {
   }
 };
 
-// 🛡️ CENTRALIZED COOKIE OPTIONS 
+// CENTRALIZED COOKIE OPTIONS 
 // These settings are the "Passport" that lets the cookie cross from Vercel to Render.
 const cookieOptions = {
   httpOnly: true,
@@ -33,7 +33,7 @@ const cookieOptions = {
   path: "/",
 };
 
-// --- REGISTER USER ---
+//  REGISTER USER ---
 const registerUser = asyncHandler(async (req, res) => {
   const { fullname, email, username, password } = req.body;
 

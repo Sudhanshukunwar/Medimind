@@ -48,10 +48,7 @@ function LoginPage() {
       setUserInfo(userInfo);
       toast.success("Login successful! Redirecting to homepage...");
 
-      // THIS IS THE FINAL FIX:
-      // Instead of using navigate(), we use window.location.href to force a
-      // full page reload. This clears any state issues and forces the Navbar
-      // to re-check the login status with the new cookies.
+      
       setTimeout(() => {
         window.location.href = "/";
       }, 2000); // 2 seconds delay to show the toast
